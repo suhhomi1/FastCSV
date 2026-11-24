@@ -44,7 +44,8 @@ public final class CsvWriter implements Closeable, Flushable {
     private final char[] lineDelimiterChars;
     private final char[] emptyFieldValue;
     private boolean openRecordWriter;
-
+    private final CsvWriterRecord record;
+    
     @SuppressWarnings("checkstyle:ParameterNumber")
     CsvWriter(final Writable writer, final char fieldSeparator, final char quoteCharacter,
               final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter) {
@@ -59,6 +60,7 @@ public final class CsvWriter implements Closeable, Flushable {
 
         emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
         lineDelimiterChars = lineDelimiter.toString().toCharArray();
+        record = new CsvWriterRecord();
     }
 
     /*
@@ -145,7 +147,7 @@ public final class CsvWriter implements Closeable, Flushable {
     public CsvWriterRecord writeRecord() {
         validateNoOpenRecord();
         openRecordWriter = true;
-        return new CsvWriterRecord();
+        return record;
     }
 
     private void validateNoOpenRecord() {
@@ -669,6 +671,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @return the enclosing CsvWriter instance
         /// @throws UncheckedIOException if a write error occurs
         public CsvWriter endRecord() {
+            fieldIdx = 0;
             openRecordWriter = false;
             try {
                 return CsvWriter.this.endRecord();
